@@ -7,6 +7,14 @@ There are future plans to add more capabilities
 such as loops, blocking, caching and build workflows.
 But for now it works.
 
+After cloning the repo - or not, you could always just
+download the script - you just have to paste this script
+tag in any HTML file you want `ijwt` to work in.
+
+```html
+<script id="ijwt" src="../static/scripts/ijwt.js" type="module"></script>
+```
+
 # Documentation
 
 ## Tabes of contents

@@ -116,14 +116,14 @@ export async function search_file(file_content = "__ijwt_current_file__") {
   return [...file_content.matchAll(file_search_exp)].map((match) => {
     return {
       file_name: match.groups.file_name,
-      insert_location: match.index + match.groups.file_name.length + 12,
+      insert_location: match.index,
       // 12 comes from the default tag length
       // <!--ijwt_-->
     };
   });
 }
 
-export async function build_tree(file_content = "__ijwt_parent_file__") {
+export async function build_tree(file_content = "__ijwt_current_file__") {
   /**
    * Builds a file tree structure for the current
    * file if no file is provided.
@@ -131,12 +131,12 @@ export async function build_tree(file_content = "__ijwt_parent_file__") {
    * @param {String} file_content - This is the content of a file
    * @return {Node} node - This the node tree structure
    */
+  if (file_content == "__ijwt_current_file__") {
+    //file_content = await fetch_file_data(base_page);
+    file_content = document.documentElement.outerHTML;
+  }
 
   const node = new Node(file_content);
-
-  if (file_content === "__ijwt_parent_file__") {
-    file_content = await fetch_file_data(base_page);
-  }
 
   let files_found = await search_file(file_content);
 
@@ -152,53 +152,68 @@ export async function build_tree(file_content = "__ijwt_parent_file__") {
   return node;
 }
 
-export async function populate_dom() {
-  const node_tree = await build_tree();
+export async function collapse_tree(node_tree) {
+  /**
+   * Collapses a tree node structure to a single file.
+   */
+  let operations_order = await search_file(node_tree.data);
+  const operations_length = operations_order.length;
+  for (const operation_index in operations_order) {
+    const new_data = await collapse_tree(node_tree.children[operation_index]);
 
-  console.log(node_tree);
+    // This is used to fix dynamic array changing
+    while (operations_length !== operations_order.length) {
+      operations_order.unshift({});
+    }
 
-  //let nodes = node_tree.children;
-  //let temp = [];
-  //let collapsed_tree = [];
-
-  //while (nodes.length > 0) {
-  //  const original_size = nodes.length;
-  //
-  //  const node = nodes.shift();
-  //  //temp.push(node.data);
-  //  nodes.unshift(...node.children);
-  //
-  //  //const updated_size = nodes.length;
-  //  //const size_diff = Math.abs(original_size - updated_size);
-  //  ////console.log(original_size, updated_size, size_diff);
-  //  //if (size_diff === 1) {
-  //  //  collapsed_tree.push(temp);
-  //  //  temp = [];
-  //  //}
-  //}
-
-  //console.log(collapsed_tree);
-  //for (let x = 0; x < collapsed_tree.length; ++x) {
-  //  const contents = [];
-  //  const inserts = [0];
-  //  for (const y in collapsed_tree[x]) {
-  //    const tags_found = await search_file(collapsed_tree[x][y]);
-  //    tags_found.forEach((e) => {
-  //      inserts.push(e.insert_location);
-  //    });
-  //  }
-  //  console.log(collapsed_tree);
-  //  inserts.forEach((e, index) => {
-  //    if (e !== 0) {
-  //      //index = collapsed_tree[x][e + 1] === undefined ? e : e + 1;
-  //      //console.log(collapsed_tree[x][index]);
-  //      console.log(
-  //        collapsed_tree[x][0].slice(0, e) +
-  //          collapsed_tree[x][index] +
-  //          collapsed_tree[x][0].slice(e, -1),
-  //      );
-  //    }
-  //  });
-  //  break;
-  //}
+    node_tree.data =
+      node_tree.data.slice(
+        0,
+        operations_order[operation_index].insert_location,
+      ) +
+      new_data +
+      node_tree.data.slice(
+        operations_order[operation_index].insert_location +
+          operations_order[operation_index].file_name.length +
+          +12,
+      );
+    operations_order = await search_file(node_tree.data);
+  }
+  return node_tree.data;
 }
+
+export async function populate_dom() {
+  /**
+   * Generates the DOM and populates the files.
+   */
+  const node_tree = await build_tree();
+  const html_parser = new DOMParser();
+  const serializer = new XMLSerializer();
+  let compiled_page = await collapse_tree(node_tree);
+
+  if (
+    window.location.pathname !== `/${base_page}` &&
+    window.location.pathname !== "/"
+  ) {
+    const base_page_data = await collapse_tree(
+      await build_tree(await fetch_file_data(base_page)),
+    );
+    const base_page_dom = html_parser.parseFromString(
+      base_page_data,
+      "text/html",
+    );
+    base_page_dom.getElementsByTagName("main")[0].innerHTML = compiled_page;
+    base_page_dom.getElementById("ijwt").remove();
+    compiled_page = serializer.serializeToString(base_page_dom);
+  }
+  document.documentElement.innerHTML = compiled_page;
+}
+
+// <<<<<
+// You can remove this if you
+// prefer to run the functions
+// as a module.
+window.onload = () => {
+  populate_dom();
+};
+// >>>>>
