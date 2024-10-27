@@ -206,7 +206,8 @@ export async function populate_dom() {
     base_page_dom.getElementById("ijwt").remove();
     compiled_page = serializer.serializeToString(base_page_dom);
   }
-  document.documentElement.innerHTML = compiled_page;
+
+  document.write(compiled_page);
 }
 
 // <<<<<
