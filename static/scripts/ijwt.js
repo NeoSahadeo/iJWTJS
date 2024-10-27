@@ -243,6 +243,7 @@ export class iJWT {
         e.src = this.url_resolver(e);
       }
     });
+    this.remove_tags(full_page);
     full_page = this.html_serializer.serializeToString(full_page);
 
     // Write out the final document
