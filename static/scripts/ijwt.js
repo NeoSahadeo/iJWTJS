@@ -238,9 +238,9 @@ export class iJWT {
     full_page = this.html_parser.parseFromString(full_page, "text/html");
     full_page.querySelectorAll(".ijwt_url_resolve").forEach((e) => {
       if (e.href) {
-        e.href = this.url_resolver(e);
+        e.href = this.url_element_resolver(e);
       } else if (e.src) {
-        e.src = this.url_resolver(e);
+        e.src = this.url_element_resolver(e);
       }
     });
     this.remove_tags(full_page);
@@ -273,11 +273,13 @@ export class iJWT {
     html_document.querySelectorAll(".ijwt_remove").forEach((e) => e.remove());
   }
 
-  url_resolver(element) {
+  url_element_resolver(element) {
     /**
-     * Generates an absolute url.
+     * Generates an absolute url. And attaches
+     * it to the element.
      *
      * @param {HTMLElement} element - This is a reference to an html doc element
+     * @return {String} url - The absolute URL
      */
     let gen_url = "";
     const serial_element = this.html_serializer.serializeToString(element);
@@ -286,10 +288,19 @@ export class iJWT {
     });
     return this.base_url + gen_url;
   }
+  url_string_resolver(url_string) {
+    /**
+     * Generates an absolute url.
+     *
+     * @param {HTMLElement} element - This is a reference to an html doc element
+     * @return {String} url - The absolute URL
+     */
+    return this.base_url + url_string;
+  }
 }
 
-const ijwt = new iJWT({ mode: "development" });
-ijwt.update_dom();
+//const ijwt = new iJWT({ mode: "development" });
+//ijwt.update_dom();
 
 //import { iJWT } from "./static/scripts/ijwt.js";
 //import { UnitTest } from "./static/scripts/tests.js";
