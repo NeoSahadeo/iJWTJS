@@ -54,7 +54,42 @@ export class iJWT {
         }
         return undefined;
     }
-    async fetch_file_data(file_name) {
+    async fetch_file_data({ file_name, file_url, } = {}) {
+        if (file_name && !file_url) {
+            return await this.fetch_by_name(file_name);
+        }
+        if (!file_name && file_url) {
+            return await this.fetch_by_url(file_url);
+        }
+        return undefined;
+    }
+    async fetch_by_url(file_url) {
+        const hashed_code = this.hasher(file_url);
+        const cached_data = this.cache_control({
+            name: file_url,
+            method: "get",
+        });
+        if (cached_data && this.mode === "production") {
+            return cached_data;
+        }
+        try {
+            const response = await fetch(file_url);
+            if (response.ok) {
+                const page_data = await response.text();
+                this.cache_control({
+                    name: hashed_code.toString(),
+                    data: page_data,
+                    method: "set",
+                });
+                return page_data;
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+        return undefined;
+    }
+    async fetch_by_name(file_name) {
         const cached_data = this.cache_control({
             name: file_name,
             method: "get",
@@ -118,7 +153,9 @@ export class iJWT {
         }
         const file_names = this.extract_file_names(files_found);
         for (const index in file_names) {
-            const file_data = await this.fetch_file_data(file_names[index]);
+            const file_data = await this.fetch_file_data({
+                file_name: file_names[index],
+            });
             if (file_data) {
                 const file_document = this.parse(file_data);
                 const _node_ = await this.generate_node_tree({
@@ -137,7 +174,6 @@ export class iJWT {
         elements.forEach((element) => {
             const child_node = node.children.shift();
             const collapsed_tree = this.collapse_node_tree(child_node);
-            console.log(collapsed_tree.body.innerHTML);
             element.outerHTML = collapsed_tree.body.innerHTML;
         });
         return node.data;
@@ -173,6 +209,14 @@ export class iJWT {
                 name: hashed_code.toString(),
                 method: "get",
             });
+            // Check if the element is a external source
+            const href = element.href;
+            const src = element.src;
+            let link = src ? src : href;
+            if (link) {
+                //this.fetch_file_data()
+            }
+            // Cache data that is an internal source
             if (this.mode === "production" && data) {
                 element.innerHTML = data;
             }

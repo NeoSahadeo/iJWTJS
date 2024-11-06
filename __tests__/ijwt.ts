@@ -53,10 +53,27 @@ describe("Cache Control ", () => {
       data: "Hello world",
     });
 
-    const data = await ijwt.fetch_file_data("dummy_test");
+    const data = await ijwt.fetch_file_data({ file_name: "dummy_test" });
     expect(data).toBe("Hello world");
   });
 
+  test("fetch file using name", async () => {
+    const ijwt = new iJWT({ mode: "production" });
+    ijwt.cache_control({
+      method: "set",
+      name: "dummy_test",
+      data: "Hello world",
+    });
+
+    const data = await ijwt.fetch_by_name("dummy_test");
+    expect(data).toBe("Hello world");
+  });
+
+  //test("fetch file using url", async () => {
+  //  const ijwt = new iJWT();
+  //  console.log(await ijwt.fetch_by_url("localhost:8000/source/global.css"));
+  //});
+  //
   test("delete method", async () => {
     const ijwt = new iJWT({ mode: "production" });
     ijwt.cache_control({
@@ -65,7 +82,7 @@ describe("Cache Control ", () => {
       data: "Hello world",
     });
 
-    let data = await ijwt.fetch_file_data("dummy_test");
+    let data = await ijwt.fetch_file_data({ file_name: "dummy_test" });
     expect(data).toBe("Hello world");
 
     ijwt.cache_control({
@@ -73,7 +90,7 @@ describe("Cache Control ", () => {
       name: "dummy_test",
     });
 
-    data = await ijwt.fetch_file_data("dummy_test");
+    data = await ijwt.fetch_file_data({ file_name: "dummy_test" });
     expect(data).toBe(undefined);
   });
 });
@@ -132,18 +149,18 @@ describe("Node Tree", () => {
 
   test("collapse of node tree default", async () => {
     const ijwt = new iJWT({ mode: "production" });
-    document.body.innerHTML = `<div id="ijwt_footer.html"></div><div id="ijwt_footer.html"></div>`;
+    document.body.innerHTML = `<div id="ijwt_header.html"></div><div id="ijwt_footer.html"></div>`;
 
-    //ijwt.cache_control({
-    //  method: "set",
-    //  name: "header.html",
-    //  data: `<div id="ijwt_bread.html"></div>`,
-    //});
-    //ijwt.cache_control({
-    //  method: "set",
-    //  name: "bread.html",
-    //  data: `<div id="ijwt_footer.html"></div>`,
-    //});
+    ijwt.cache_control({
+      method: "set",
+      name: "header.html",
+      data: `<div id="ijwt_bread.html"></div>`,
+    });
+    ijwt.cache_control({
+      method: "set",
+      name: "bread.html",
+      data: `<div id="ijwt_footer.html"></div>`,
+    });
     ijwt.cache_control({
       method: "set",
       name: "footer.html",
@@ -230,7 +247,7 @@ describe("utility functions", () => {
 
     expect(ijwt.hasher("Hello_world")).toEqual(970643909);
   });
-  test("cache class method", () => {
+  test("cache class method saving internal data", () => {
     const ijwt = new iJWT({ mode: "production" });
     const original = `
     <div id="this_is_a_cache" class="ijwt_cache">This will be in cache!</div>
@@ -250,6 +267,16 @@ describe("utility functions", () => {
     `;
     ijwt.cache_manager(document);
     expect(document.body.innerHTML).toEqual(original);
+  });
+  test("cache class method saving external data", () => {
+    const ijwt = new iJWT({ mode: "production" });
+    const original = `
+    <link class="ijwt_cache" rel="stylesheet" href="global.css" />
+    `;
+
+    document.body.innerHTML = original;
+
+    ijwt.cache_manager(document);
   });
   test("remove tags", () => {
     const ijwt = new iJWT({ mode: "production" });
