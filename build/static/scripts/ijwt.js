@@ -1,4 +1,3 @@
-"use strict";
 /*
 MIT License 2024 Neo Sahadeo
 
@@ -16,11 +15,7 @@ EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.iJWT = void 0;
 class Node {
-    data;
-    children;
     constructor(data) {
         this.data = data;
         this.children = [];
@@ -29,14 +24,7 @@ class Node {
         this.children.push(node);
     }
 }
-class iJWT {
-    site_path;
-    directories;
-    index;
-    mode;
-    site_base;
-    html_parser;
-    html_serializer;
+export class iJWT {
     constructor({ site_path = "/", directories = ["", "pages", "partials", "static/css", "static/scripts"], index = "index.html", mode = "developement", } = {}) {
         this.site_path = site_path;
         this.index = index;
@@ -203,4 +191,3 @@ class iJWT {
         });
     }
 }
-exports.iJWT = iJWT;

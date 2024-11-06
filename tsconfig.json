@@ -4,7 +4,7 @@
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "target": "es2022",
+    "target": "es2020",
     "allowJs": false,
     "moduleDetection": "force",
     "isolatedModules": true,
@@ -15,7 +15,7 @@
     "noImplicitOverride": true,
 
     /* If transpiling with TypeScript: */
-    "module": "NodeNext",
+    //"module": "NodeNext",
     "outDir": "./build/static/scripts/",
 
     /* If your code runs in the DOM: */
