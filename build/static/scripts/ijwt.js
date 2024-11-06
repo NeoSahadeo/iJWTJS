@@ -214,7 +214,12 @@ export class iJWT {
             const src = element.src;
             let link = src ? src : href;
             if (link) {
-                //this.fetch_file_data()
+                (async () => {
+                    const data = await this.fetch_file_data({ file_url: link });
+                    if (data) {
+                        element.outerHTML = data;
+                    }
+                })();
             }
             // Cache data that is an internal source
             if (this.mode === "production" && data) {
