@@ -190,11 +190,12 @@ export class iJWT {
     }
 
     const elements = this.get_files_wanted({ file_doc: node.data });
-    for (const index in node.children) {
+    elements.forEach((element) => {
       const child_node = node.children.shift();
-      (elements[index] as HTMLElement).outerHTML =
-        this.collapse_node_tree(child_node).body.innerHTML;
-    }
+      const collapsed_tree = this.collapse_node_tree(child_node);
+      console.log(collapsed_tree.body.innerHTML);
+      element.outerHTML = collapsed_tree.body.innerHTML;
+    });
     return node.data;
   }
 

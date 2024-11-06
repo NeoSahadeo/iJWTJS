@@ -130,20 +130,20 @@ describe("Node Tree", () => {
     ).toEqual(2);
   });
 
-  test("collapse of node tree", async () => {
+  test("collapse of node tree default", async () => {
     const ijwt = new iJWT({ mode: "production" });
-    document.body.innerHTML = `<div id="ijwt_header.html"></div>`;
+    document.body.innerHTML = `<div id="ijwt_footer.html"></div><div id="ijwt_footer.html"></div>`;
 
-    ijwt.cache_control({
-      method: "set",
-      name: "header.html",
-      data: `<div id="ijwt_bread.html"></div>`,
-    });
-    ijwt.cache_control({
-      method: "set",
-      name: "bread.html",
-      data: `<div id="ijwt_footer.html"></div>`,
-    });
+    //ijwt.cache_control({
+    //  method: "set",
+    //  name: "header.html",
+    //  data: `<div id="ijwt_bread.html"></div>`,
+    //});
+    //ijwt.cache_control({
+    //  method: "set",
+    //  name: "bread.html",
+    //  data: `<div id="ijwt_footer.html"></div>`,
+    //});
     ijwt.cache_control({
       method: "set",
       name: "footer.html",
@@ -151,7 +151,9 @@ describe("Node Tree", () => {
     });
 
     const node_tree = await ijwt.generate_node_tree({ file_doc: document });
-    expect(ijwt.collapse_node_tree(node_tree).body.innerHTML).toEqual("Feet!");
+    expect(ijwt.collapse_node_tree(node_tree).body.innerHTML).toEqual(
+      "Feet!Feet!",
+    );
   });
 
   test("collapse of node tree and preserve anonymous functions", async () => {
