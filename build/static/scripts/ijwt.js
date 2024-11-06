@@ -1,3 +1,4 @@
+"use strict";
 /*
 MIT License 2024 Neo Sahadeo
 
@@ -15,7 +16,11 @@ EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.iJWT = void 0;
 class Node {
+    data;
+    children;
     constructor(data) {
         this.data = data;
         this.children = [];
@@ -24,7 +29,14 @@ class Node {
         this.children.push(node);
     }
 }
-export class iJWT {
+class iJWT {
+    site_path;
+    directories;
+    index;
+    mode;
+    site_base;
+    html_parser;
+    html_serializer;
     constructor({ site_path = "/", directories = ["", "pages", "partials", "static/css", "static/scripts"], index = "index.html", mode = "developement", } = {}) {
         this.site_path = site_path;
         this.index = index;
@@ -105,7 +117,7 @@ export class iJWT {
     extract_file_names(elements) {
         const file_names = [];
         elements.forEach((e) => {
-            const matches = [...e.id.matchAll(/ijwt_(?<file_name>.*)/gm)].map((match) => { var _a; return (_a = match.groups) === null || _a === void 0 ? void 0 : _a.file_name; });
+            const matches = [...e.id.matchAll(/ijwt_(?<file_name>.*)/gm)].map((match) => match.groups?.file_name);
             file_names.push(...matches);
         });
         return file_names;
@@ -134,11 +146,12 @@ export class iJWT {
             return node.data;
         }
         const elements = this.get_files_wanted({ file_doc: node.data });
-        for (const index in node.children) {
+        elements.forEach((element) => {
             const child_node = node.children.shift();
-            elements[index].outerHTML =
-                this.collapse_node_tree(child_node).body.innerHTML;
-        }
+            const collapsed_tree = this.collapse_node_tree(child_node);
+            console.log(collapsed_tree.body.innerHTML);
+            element.outerHTML = collapsed_tree.body.innerHTML;
+        });
         return node.data;
     }
     url_qualifier(url) {
@@ -190,3 +203,4 @@ export class iJWT {
         });
     }
 }
+exports.iJWT = iJWT;
